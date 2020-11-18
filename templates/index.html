@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body style="background-image: url('static/ocean.jpg')">
+        <style>
+            @font-face {
+                font-family: myFont;
+                src: url(static/akaDora.otf);
+            }
+            body {
+                font-family: myFont;
+            }
+        </style>
+
+        <div>
+            <div style="margin:auto;display:block">
+                <h1 style="text-align: center;font-size: 2.5em;margin-bottom: 0;">Flotte 2e Lausanne</h1>
+            </div>
+            <div id="svgRoot"></div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@latest/dist/svg.min.js"></script>
+        <script async defer>
+            var num_teams = 5;
+            var names = ["Serval", "Isard", "Tamia", "Caribou", "Puma"]
+            var positions = [[40,20], [500, 50], [950, 150], [250, 250], [700, 300]]
+            var team_state = null;
+
+            var ship_parts = ["TL-1", "TL-2", "ML-1", "ML-2", "ML-3", "ML-4", "B"]
+            var part_colors = ["#ef9b0f","#fefefe","#db1702","#fdee00","#3a9d23","#318ce7","#d473d4"]
+            
+            var draw = SVG().addTo('#svgRoot').size('100%', '100%');
+            var svgFile;
+
+            $(document).ready(function() {
+                load_data();
+            });
+
+            function load_data() {
+                $.get("/state", function (data) {
+                    team_state = data;
+                    createShips();
+                })
+            };
+
+            function createShips() {
+                draw.clear();
+                $.get('static/ship.svg', function(contents) {
+                    svgText = $('#root', contents).html();
+
+                    for (let team_idx = 0; team_idx < num_teams; team_idx++) {
+                        var svg = draw.svg(svgText);
+                        svg.viewbox(0, 0, 1280, 1026);
+
+                        ship = svg.findOne(`.ship:last-child`);
+                        ship.id(`g${team_idx}`);
+                        ship.translate(...positions[team_idx])
+                        
+                        textGroup= ship.group();
+                        textGroup.transform({ translate: [600, 970], scaleX: 10, scaleY: 10 })
+                        textGroup.text(names[team_idx]).font({ size: 18, anchor: 'middle', leading: '1.5em' })
+
+                        ship_parts.map((cl, part_idx) => {
+                            var part = ship.findOne(`.${cl}`);
+                            part.stroke({ color: part_colors[part_idx], width: 40 });
+                            fillPart(part, team_idx, part_idx);
+
+                            part.click(() => handleClick(team_idx, part_idx, part));
+                        });
+                    }
+                }, 'xml');
+            }
+
+            function handleClick(team_idx, part_idx, part) {
+                let part_state = 1 - team_state[team_idx][part_idx]
+                team_state[team_idx][part_idx] = part_state;
+                $.post( "/update", { team_idx: team_idx, pa_idx: part_idx, pa_value: part_state } );
+                fillPart(part, team_idx, part_idx);
+            }
+            
+            function fillPart(el, team_idx, part_idx) {
+                let part_completed = team_state[team_idx][part_idx] == 1
+                el.fill({
+                    color: part_completed ? part_colors[part_idx] : "white",
+                    opacity: part_completed ? .85 : 0.3
+                });
+            }
+
+        </script>
+    </body>
+</html>
