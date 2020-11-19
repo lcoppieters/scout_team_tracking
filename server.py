@@ -11,16 +11,22 @@ try:
 except IOError:
     team_states = [[0,]*pa_number for _ in range(team_number)]
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
+@app.route('/admin')
+@app.route('/louise')
+@app.route('/lwiiizz')
+def index_admin():
+    return render_template('index_admin.html')
+
 @app.route('/update', methods=['POST'])
 def update_team():
-   data = request.form
-   team_states[int(data["team_idx"])][int(data["pa_idx"])] = int(data["pa_value"])
-   print(data["team_idx"], data["pa_idx"], data["pa_value"])
-   print(team_states)
+   data = request.get_json()
+   team_states[data["team_idx"]][data["pa_idx"]] = data["pa_value"]
    with open('data.json', 'w') as f:
         json.dump(team_states, f)
    return ""
@@ -32,5 +38,5 @@ def get_state():
 
 
 if __name__ == '__main__':
-  app.run(host='127.0.0.1', port=8000, debug=True)
+  app.run(host='0.0.0.0', port=8000, debug=True)
  

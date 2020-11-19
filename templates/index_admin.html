@@ -45,7 +45,7 @@
                 redraw();
 
                 setInterval(refresh, 30*1000);
-                window.addEventListener("focus", refresh);
+                window.addEventListener("focus", () => setTimeout(refresh, 500));
 
                 $(window).resize(() => {
                     let should_be_phone_view = ($(window).height() > $(window).width());
@@ -121,11 +121,21 @@
                             part.addClass(`pa-${part_idx}`);
                             part.stroke({ color: part_colors[part_idx], width: 40 });
                             fillPart(team_idx, part_idx);
+                            part.click(() => handleClick(team_idx, part_idx));
                         });
                     }
                 }, 'xml');
             }
 
+            function handleClick(team_idx, part_idx) {
+                let part_state = team_state[team_idx][part_idx] = 1 - team_state[team_idx][part_idx];
+                $.ajax({
+                    url : "/update", type: 'POST', contentType: "application/json",
+                    data: JSON.stringify({ team_idx: team_idx, pa_idx: part_idx, pa_value: part_state }),
+                });
+                fillPart(team_idx, part_idx);
+            }
+            
             function fillPart(team_idx, part_idx) {
                 let part = draw.findOne(`#tm-${team_idx} > .pa-${part_idx}`);
                 let part_completed = team_state[team_idx][part_idx] == 1;
