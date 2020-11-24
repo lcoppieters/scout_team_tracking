@@ -2,7 +2,7 @@ import json
 from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
-team_number = 5
+team_number = 4
 pa_number = 7
 
 try:
@@ -18,10 +18,11 @@ def index():
 
 
 @app.route('/admin')
-@app.route('/louise')
-@app.route('/lwiiizz')
+@app.route('/laurence')
+@app.route('/argali')
 def index_admin():
     return render_template('index_admin.html')
+
 
 @app.route('/update', methods=['POST'])
 def update_team():
@@ -34,7 +35,7 @@ def update_team():
 
 @app.route('/state', methods=['GET'])
 def get_state():
-   return jsonify(team_states)
+    return jsonify(team_states)
 
 
 if __name__ == '__main__':

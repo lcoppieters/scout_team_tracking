@@ -21,7 +21,7 @@
 
         <div>
             <div style="margin:auto;display:block">
-                <h1 style="text-align: center;font-size: 2.5em;margin-bottom: 0;">Flotte 2e Lausanne</h1>
+                <h1 style="text-align: center;font-size: 2.5em;margin-bottom: 0;">Flotte 18e Bruxelles</h1>
             </div>
             <div id="svgRoot" style="margin-top: -2em;"></div>
         </div>
@@ -29,8 +29,8 @@
         <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@latest/dist/svg.min.js"></script>
         <script async defer>
-            var num_teams = 5;
-            var names = ["Serval", "Isard", "Tamia", "Caribou", "Puma"]
+            var num_teams = 4;
+            var names = ["Chevreuil", "Chamois", "Lynx", "Renard"]
             var ship_parts = ["TL-1", "TL-2", "ML-1", "ML-2", "ML-3", "ML-4", "B"]
             var part_colors = ["#ef9b0f","#fefefe","#db1702","#fdee00","#3a9d23","#318ce7","#d473d4"]
             var part_names = [ "Cuisinier", "Liturgiste", "Secouriste", "Messager" , "Pionnier", "Topographe", "Bout-en-train"]
@@ -73,7 +73,7 @@
                     height = 2500;
                     scale = 2;
                 } else {
-                    positions = [[40,20], [500, 70], [950, 150], [250, 250], [700, 300]];
+                    positions = [[40,20], [600, 70], [850, 300], [250, 250]];
                     legend_position = [1150, 0]
                     height = 530;
                     scale = 1;
@@ -93,7 +93,7 @@
             function createLegend() {
                 let legend_group = draw.group().id("legend");
                 legend_group.translate(...legend_position).scale(scale);
-                part_names.map( (name, i) => {
+                part_names.forEach( (name, i) => {
                     let part_group = legend_group.group().translate(0, i*22);
                     part_group.rect(20, 20).fill(part_colors[i]);
                     part_group.text(name).translate(25, -5);
@@ -130,7 +130,9 @@
             function handleClick(team_idx, part_idx) {
                 let part_state = team_state[team_idx][part_idx] = 1 - team_state[team_idx][part_idx];
                 $.ajax({
-                    url : "/update", type: 'POST', contentType: "application/json",
+                    url : "/update",
+                    type: 'POST',
+                    contentType: "application/json",
                     data: JSON.stringify({ team_idx: team_idx, pa_idx: part_idx, pa_value: part_state }),
                 });
                 fillPart(team_idx, part_idx);
